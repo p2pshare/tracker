@@ -1,4 +1,5 @@
 import redis
+import json
 
 
 class TrackerRepository(object):
@@ -25,14 +26,14 @@ class TrackerRepository(object):
         return active_peers
 
     def is_peer_active(self, peer):
-        ip_port = peer.split("#")
+        ip_port = peer.split(":")
         return self.r.exists(self.get_active_peer_key(ip_port[0], ip_port[1]))
 
     def get_chunk_key(self, share_id, chunk_id):
         return "chunk#{share_id}#{chunk_id}".format(share_id=share_id, chunk_id=chunk_id)
 
     def get_peer_val(self, ip, port):
-        return "{ip}#{port}".format(ip=ip, port=port)
+        return "{ip}:{port}".format(ip=ip, port=port)
 
     def get_active_peer_key(self, ip, port):
         return "active_peer#{peer_val}".format(peer_val=self.get_peer_val(ip, port))
@@ -51,7 +52,7 @@ repo.report_chunk("fdef", "1001", "127.0.0.1", 1234)
 repo.report_chunk("fdef", "1001", "127.0.0.2", 1234)
 repo.report_chunk("fdef", "1001", "127.0.0.3", 1234)
 
-print repo.get_chunk_peers("fdef", "1001")
+print json.dumps(repo.get_chunk_peers("fdef", "1001"))
 
 # test clean up
 repo.r.delete(repo.get_active_peer_key("127.0.0.1", 1234))
