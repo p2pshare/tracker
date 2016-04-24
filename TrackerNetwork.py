@@ -1,8 +1,14 @@
 import threading
 import SocketServer
+import TrackerService
+import Request
+import Response
+import sys
 
 
 class ThreadedUDPRequestHandler(SocketServer.BaseRequestHandler):
+    service = TrackerService.TrackerService()
+
     def handle(self):
         data = self.request[0].strip()
         ### get port number
@@ -19,7 +25,26 @@ class ThreadedUDPRequestHandler(SocketServer.BaseRequestHandler):
 
         ### assemble a response message to client
         response = "%s %s" % (cur_thread.name, data)
-        socket.sendto(data.upper(), self.client_address)
+        try:
+            socket.sendto(self.get_response(Request.Request(js=data)).to_json(), self.client_address)
+        except:
+            e = sys.exc_info()[0]
+            socket.sendto(Response.Response(message="FAIL", data=str(e)).to_json(), self.client_address)
+
+    def get_response(self, request):
+        if request.cmd == 'report_active':
+            self.service.report_active(ip=request.ip, port=request.port)
+            return Response.Response(message="OK")
+        elif request.cmd == 'report_chunk':
+            self.service.report_chunk(share_id=request.share_id, chunk_id=request.chunk_id, ip=request.ip,
+                                      port=request.port)
+            return Response.Response(message="OK")
+        elif request.cmd == 'get_chunk_peers':
+            response = Response.Response(message="OK")
+            response.data = self.service.get_chunk_peers(share_id=request.share_id, chunk_id=request.chunk_id)
+            return response
+        else:
+            return Response.Response(message="FAIL", data="cmd not recognized!")
 
 
 class ThreadedUDPServer(SocketServer.ThreadingMixIn, SocketServer.UDPServer):
