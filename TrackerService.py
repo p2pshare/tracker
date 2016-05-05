@@ -2,6 +2,16 @@ import TrackerRepository
 
 
 class TrackerService(object):
+    '''
+    File name: TrackerService.py
+    Author: Chenglong Wei, classId 82, 010396464
+    Date created: 4/1/2016
+    Date last modified: 5/1/2016
+    Python Version: 2.7.10
+    Functions: Provide services to TrackerNetwork layer.
+               Use services provided by TrackerRepository.
+    '''
+
     def __init__(self):
         self.repo = TrackerRepository.TrackerRepository()
 

@@ -7,23 +7,33 @@ import sys
 
 
 class ThreadedUDPRequestHandler(SocketServer.BaseRequestHandler):
+    '''
+    File name: TrackerNetwork.py
+    Author: Chenglong Wei, classId 82, 010396464
+    Date created: 4/20/2016
+    Date last modified: 5/1/2016
+    Python Version: 2.7.10
+    Functions: Get connection from peer, get peer's Request and response with data wrapped by Response.
+               Use services provided by TrackerService.
+    '''
+
     service = TrackerService.TrackerService()
 
     def handle(self):
         data = self.request[0].strip()
-        ### get port number
+        # get port number
         port = self.client_address[1]
-        ### get the communicate socket
+        # get the communicate socket
         socket = self.request[1]
-        ### get client host ip address
+        # get client host ip address
         client_address = (self.client_address[0])
-        ### proof of multithread
+        # proof of multithread
         cur_thread = threading.current_thread()
         print "thread %s" % cur_thread.name
         print "received call from client address :%s" % client_address
         print "received data from port [%s]: %s" % (port, data)
 
-        ### assemble a response message to client
+        # assemble a response message to client
         response = "%s %s" % (cur_thread.name, data)
         try:
             socket.sendto(self.get_response(Request.Request(js=data)).to_json(), self.client_address)
@@ -32,6 +42,7 @@ class ThreadedUDPRequestHandler(SocketServer.BaseRequestHandler):
             socket.sendto(Response.Response(message="FAIL", data=str(e)).to_json(), self.client_address)
 
     def get_response(self, request):
+        # Distinguish request type, and response with corresponding Response.
         if request.cmd == 'report_active':
             self.service.report_active(ip=request.ip, port=request.port)
             return Response.Response(message="OK")

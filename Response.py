@@ -2,6 +2,15 @@ import json
 
 
 class Response(object):
+    '''
+    File name: Response.py
+    Author: Chenglong Wei, classId 82, 010396464
+    Date created: 4/20/2016
+    Date last modified: 5/1/2016
+    Python Version: 2.7.10
+    Functions: Wrapped peer's response.
+    '''
+
     def __init__(self, js=None, message=None, data=None):
         if js is not None:
             self.__dict__ = json.loads(js)
